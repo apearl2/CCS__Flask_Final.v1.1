@@ -3,9 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <title>Your Results</title>
+    <!-- Link to CSS File -->
+    <link href="static/IS.UI_V1.css" type="text/css" rel="stylesheet">
+
+    <articletop>
+        Custom College Search <span style="color:mediumseagreen;">(v1.0)</span>
+         <br />
+    </articletop>
 </head>
 <body>
-<b>Your top 10 schools: </b><br /><br />
-    {{ value }}
+    <div>
+        <b>Your top schools: </b><br /><br />
+    1. {{ value1 }}
+    <br />
+    2. {{  value2 }}
+    <br />
+    3. {{ value3 }}
+    <br />
+    4. {{ value4 }}
+    <br />
+    5. {{ value5 }}
+    <br />
+    6. {{ value6 }}
+    <br />
+    7. {{  value7 }}
+    <br />
+    8. {{ value8 }}
+    <br />
+    9. {{ value9 }}
+    <br />
+    10. {{ value10 }}
+    <br />
+    {{ value11 }}
+    <br />
+    {{  value12 }}
+    <br />
+    {{ value13 }}
+    <br />
+    {{ value14 }}
+    <br />
+    {{ value15 }}
+    <br />
+    {{ value16 }}
+    <br />
+    {{  value17 }}
+    <br />
+    {{ value18 }}
+    <br />
+    {{ value19 }}
+    <br />
+    {{ value20 }}
+    </div>
+    <br/><br/>
+    <form action="/filter">
+        Filter your List by Acceptance Rate (Minimum) <br />
+        10 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 70 <br/>
+        <input style="accent-color:mediumseagreen; background-color:WhiteSmoke;" type="range" min="10" max="70" value="50" class="slider" id="myRange" name="filterI">
+        <button>Confirm</button>
+    </form>
 </body>
 </html>

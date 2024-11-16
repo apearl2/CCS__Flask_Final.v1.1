@@ -4,14 +4,10 @@ from flask import Flask, render_template, request
 import requests
 from bs4 import BeautifulSoup
 
-import time
-
 try:
     from googlesearch import search
 except ImportError:
     print("No module named 'google' found")
-
-#TODO Round colleges points that appear in both P and CF
 
 #Global Variables-------------------------------------------------------------------------------------------------------
 newrankList = []
@@ -23,7 +19,9 @@ reportfinalListC = []
 customList = []
 
 aImportance = 0
-numPcalls = 3
+numPcalls = 0
+numCcalls = 0
+
 baseList = [25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
 baseList2 = [25, 24.5, 24, 23.5, 23, 22.5, 22, 21.5, 21, 20.5, 20, 19.5, 19, 18.5, 18, 17.5, 17, 16.5, 16, 15.5, 15, 14.5, 14, 13.5, 13, 12.5, 12, 11.5, 11, 10.5, 10, 9.5, 9, 8.5, 8, 7.5, 7, 6.5, 6, 5.5, 5, 4.5, 4, 3.5, 3, 2.5, 2, 1.5, 1]
 
@@ -164,6 +162,7 @@ def listA(order, funkName):
 def averageA(funkName2):
     global finalList
     global numPcalls
+    global numCcalls
     global finalListCollegesOnlyP
     global finalListCollegesOnlyC
     global reportfinalListP
@@ -200,7 +199,7 @@ def averageA(funkName2):
                     totalAvgPts = totalPts / numPcalls
                     totalAvgPts = round(totalAvgPts, 2)
 
-                    print(finalListCollegesOnlyP[i8])
+                    #print(finalListCollegesOnlyP[i8])
                     reportfinalListP.append(finalListCollegesOnlyP[i8])
                     reportfinalListP.append(totalAvgPts)
                     #print(reportfinalList)
@@ -236,7 +235,7 @@ def averageA(funkName2):
                     totalPts += int(finalList[i7])
                     i7 += 1
                 # print(totalPts)
-                totalAvgPts = totalPts / numPcalls
+                totalAvgPts = totalPts / numCcalls
                 totalAvgPts = round(totalAvgPts, 2)
 
                 reportfinalListC.append(finalListCollegesOnlyC[i8])
@@ -265,6 +264,19 @@ def joinA():
     global reportfinalListP
     global reportfinalListC
 
+    # -------------------------------------------------------------------------------
+    # First, Goes through all colleges in finalListCollegesOnlyC and divides them by 2 if they do not exist in P list
+    i = 0
+    while i < (len(reportfinalListC) - 1):
+        now = reportfinalListC[i]
+
+        try:
+            trialI = finalListCollegesOnlyP.index(now)
+        except ValueError:
+            reportfinalListC[i + 1] /= 2
+
+        i += 2
+
     #Loop through all colleges in final P list (e1)
     e1 = 0
     e2 = 0
@@ -287,14 +299,14 @@ def joinA():
 
         if alreadyExists == False:
             reportfinalListC.append(reportfinalListP[e1])
-            reportfinalListC.append(reportfinalListP[e1 + 1])
+            reportfinalListC.append((reportfinalListP[e1 + 1])/2)
         else:
             pass
 
         e1 += 2
 
-#Function to return top 10 (can easily modify for top 20 or others) schools by points
-def best10():
+#Function sorts reportfinalListC into order based on total points
+def bestSort():
     global reportfinalListC
     global customList
 
@@ -305,7 +317,8 @@ def best10():
 
     #Main loop that finds top 10 of rfList
     i = 0
-    while i < 10:
+    rflC = (len(reportfinalListC) / 2)
+    while i < rflC:
         #Resets
         largest = reportfinalListC[1]
         e3 = 1
@@ -324,15 +337,14 @@ def best10():
         #Appends to final custom list
         ntopSchool = topSchool.replace("-", " ")
         customList.append(ntopSchool)
-        customList.append(reportfinalListC[realI])
-
+        #customList.append(reportfinalListC[realI])
+        customList = [x.title() for x in customList]
 
         #Deletes elements from rfList
         del reportfinalListC[realI]
         del reportfinalListC[realI - 1]
 
         i += 1
-
 
 
 #College Factual Function
@@ -520,7 +532,7 @@ def conversions():
 
     finalPlist = [' UniversityofDenverDenver,', 'EmoryUniversity', 'LehighUniversity', 'FloridaState', 'VirginiaTech', 'WashingtonState', ' Auburn', ' WashingtonUniversityin', 'KansasState', 'RiceUniversity', 'TulaneUniversity', 'Hampden-Sydney', 'AngeloState', 'FranklinW.', 'ClaremontMc', 'UniversityofWisconsin-', 'CollegeoftheAtlantic', 'TheUniversityof', 'ThomasAquinas', 'Hamilton', 'Amherst', 'UniversityofCincinnatiCincinnati,', ' VanderbiltUniversity', ' GonzagaUniversity', 'ArizonaState', 'Syracuse', ' Clemson', 'BrighamYoung', 'TheOhio', 'MichiganState', 'UniversityofTex', 'ButlerUniversity', 'Wabash', 'UniversityofNotre', 'UniversityofDaytonDayton,', 'UniversityofTennessee-', 'UnitedStates', 'XavierUniversity(', ' UniversityofNebraska—', 'IowaState', ' BryantUniversity', 'UniversityofSan', 'BrynMawr', 'Lewis&', ' FloridaSouthern', 'MountHolyoke', ' SalveRegina', ' ReedCollege', ' RhodesCollege', 'RollinsCollege', ' HighPoint', 'TexasChristian', 'UniversityofPuget', 'UniversityofCalifornia—', 'PepperdineUniversity', ' LoyolaMarymount', 'AmericanUniversity', 'SimmonsUniversity', 'EmersonCollege', 'ColumbiaUniversity', 'CityUniversityof', 'EugeneLang', ' SuffolkUniversity', ' NortheasternUniversity', ' GeorgeWashington', 'TheCooper', 'UniversityofVermont', 'LoyolaUniversity', 'NewYork', ' DruryUniversity', 'JuniataCollege', "St.John's", 'DenisonUniversity', 'CaliforniaState', 'Wellesley', ' DrewUniversity', 'AgnesScott', 'St.Bonaventure', 'Bowdoin', 'Scripps', 'Pitzer', 'UniversityofKentucky', 'WheatonCollege(', 'Skidmore', ' ChristopherNewport', 'Elon', 'UniversityofMassachusetts-', 'CornellUniversity', 'BatesCollege', 'JamesMadison', ' MuhlenbergCollege', ' St.Olaf', ' Gettysburg', 'GeorgiaInstituteof', 'UniversityofVirginia', 'UniversityofMichigan—', 'NorthCarolina', 'UniversityofWashington', 'UniversityofGeorgia', 'UniversityofIllinois', ' StateUniversityof', 'MissouriUniversityof', 'William&', 'PurdueUniversity—', 'NewCollegeof', 'TexasA&', 'NewJersey', 'MassachusettsInstituteof', 'Princeton', 'Stanford', 'HarveyMudd', 'CaliforniaInstituteof', 'DartmouthCollege', 'Harvard', 'Williams', 'YaleUniversity', 'JohnsHopkins', 'CarnegieMellon', 'Universityof', 'BrownUniversity', 'Duke', 'ColgateUniversity', 'Pomona', 'MichiganTechnological', 'PennState', ' The', 'MiamiUniversity', 'OregonState', ' St.Lawrence', 'Rose-Hulman', 'WakeForest', 'Marquette', 'AustinCollege', ' HobartandWilliam', ' CollegeofWoosterWooster,', 'WorcesterPolytechnic']
 
-    completePconversionList = ['university-of-denver', 'emory-university', 'lehigh-university', 'florida-state-university', 'virginia-tech', 'washington-state-university', 'auburn-university', 'washington-university-in-st-louis', 'kansas-state-university', 'rice-university', 'tulane-university-of-louisiana', 'hampden-sydney-college', 'angelo-state-university', 'franklin-university', 'claremont-mckenna-college', 'university-of-wisconsin-madison', 'college-of-the-atlantic', 'university-of-connecticut', 'thomas-aquinas-college', 'hamilton-college', 'amherst-college', 'university-of-cincinnati-main-campus', 'vanderbilt-university', 'gonzaga-university', 'arizona-state-university', 'syracuse-university', 'clemson-university', 'brigham-young-university-provo', 'ohio-state-university-main-campus', 'michigan-state-university', 'the-university-of-texas-at-austin', 'butler-university', 'wabash-college', 'university-of-notre-dame', 'university-of-dayton', 'the-university-of-tennessee', 'united-states-naval-academy', 'xavier-university', 'university-of-nebraska-lincoln', 'iowa-state-university', 'bryant-university', 'university-of-san-francisco', 'bryn-mawr-college', 'lewis-and-clark-college', 'florida-southern-college', 'mount-holyoke-college', 'salve-regina-university', 'reed-college', 'rhodes-college', 'rollins-college', 'high-point-university', 'texas-christian-university', 'university-of-puget-sound', 'university-of-california-berkeley', 'pepperdine-university', 'loyola-marymount-university', 'american-university', 'simmons-college', 'emerson-college', 'columbia-university-in-the-city-of-new-york', 'city-university-of-seattle', 'suny-at-binghamton', 'suffolk-university', 'northeastern-university', 'george-washington-university', 'cooper-union-for-the-advancement-of-science-and-art', 'university-of-vermont', 'loyola-university-chicago', 'new-york-university', 'drury-university', 'juniata-college', 'st-johns-university-new-york', 'denison-university', 'california-state-university-los-angeles', 'wellesley-college', 'drew-university', 'agnes-scott-college', 'saint-bonaventure-university', 'bowdoin-college', 'scripps-college', 'pitzer-college', 'university-of-kentucky', 'wheaton-college-illinois', 'skidmore-college', 'christopher-newport-university', 'elon-university', 'university-of-massachusetts-amherst', 'cornell-university', 'bates-college', 'james-madison-university', 'muhlenberg-college', 'st-olaf-college', 'gettysburg-college', 'georgia-institute-of-technology-main-campus', 'university-of-virginia-main-campus', 'university-of-michigan-ann-arbor', 'university-of-north-carolina-at-chapel-hill', 'university-of-washington-seattle-campus', 'university-of-georgia', 'university-of-illinois-at-urbana-champaign', 'suny-at-binghamton', 'university-of-missouri-columbia', 'college-of-william-and-mary', 'purdue-university-main-campus', 'the-new-school', 'texas-a-and-m-university-college-station', 'the-college-of-new-jersey', 'massachusetts-institute-of-technology', 'princeton-university', 'stanford-university', 'harvey-mudd-college', 'california-institute-of-technology', 'dartmouth-college', 'harvard-university', 'williams-college', 'yale-university', 'johns-hopkins-university', 'carnegie-mellon-university', 'university-of-connecticut', 'brown-university', 'duke-university', 'colgate-university', 'pomona-college', 'michigan-technological-university', 'pennsylvania-state-university-main-campus', 'suny-at-binghamton', 'miami-university-oxford', 'oregon-state-university', 'st-lawrence-university', 'rose-hulman-institute-of-technology', 'wake-forest-university', 'marquette-university', 'austin-college', 'hobart-william-smith-colleges', 'the-college-of-wooster', 'worcester-polytechnic-institute']
+    completePconversionList = ['university-of-denver', 'emory-university', 'lehigh-university', 'florida-state-university', 'virginia-tech', 'washington-state-university', 'auburn-university', 'washington-university-in-st-louis', 'kansas-state-university', 'rice-university', 'tulane-university-of-louisiana', 'hampden-sydney-college', 'angelo-state-university', 'franklin-university', 'claremont-mckenna-college', 'university-of-wisconsin-madison', 'college-of-the-atlantic', 'university-of-chicago', 'thomas-aquinas-college', 'hamilton-college', 'amherst-college', 'university-of-cincinnati-main-campus', 'vanderbilt-university', 'gonzaga-university', 'arizona-state-university', 'syracuse-university', 'clemson-university', 'brigham-young-university-provo', 'ohio-state-university-main-campus', 'michigan-state-university', 'the-university-of-texas-at-austin', 'butler-university', 'wabash-college', 'university-of-notre-dame', 'university-of-dayton', 'the-university-of-tennessee', 'united-states-naval-academy', 'xavier-university', 'university-of-nebraska-lincoln', 'iowa-state-university', 'bryant-university', 'university-of-san-francisco', 'bryn-mawr-college', 'lewis-and-clark-college', 'florida-southern-college', 'mount-holyoke-college', 'salve-regina-university', 'reed-college', 'rhodes-college', 'rollins-college', 'high-point-university', 'texas-christian-university', 'university-of-puget-sound', 'university-of-california-berkeley', 'pepperdine-university', 'loyola-marymount-university', 'american-university', 'simmons-college', 'emerson-college', 'columbia-university-in-the-city-of-new-york', 'city-university-of-seattle', 'suny-at-binghamton', 'suffolk-university', 'northeastern-university', 'george-washington-university', 'cooper-union-for-the-advancement-of-science-and-art', 'university-of-vermont', 'loyola-university-chicago', 'new-york-university', 'drury-university', 'juniata-college', 'st-johns-university-new-york', 'denison-university', 'california-state-university-los-angeles', 'wellesley-college', 'drew-university', 'agnes-scott-college', 'saint-bonaventure-university', 'bowdoin-college', 'scripps-college', 'pitzer-college', 'university-of-kentucky', 'wheaton-college-illinois', 'skidmore-college', 'christopher-newport-university', 'elon-university', 'university-of-massachusetts-amherst', 'cornell-university', 'bates-college', 'james-madison-university', 'muhlenberg-college', 'st-olaf-college', 'gettysburg-college', 'georgia-institute-of-technology-main-campus', 'university-of-virginia-main-campus', 'university-of-michigan-ann-arbor', 'university-of-north-carolina-at-chapel-hill', 'university-of-washington-seattle-campus', 'university-of-georgia', 'university-of-illinois-at-urbana-champaign', 'suny-at-binghamton', 'university-of-missouri-columbia', 'college-of-william-and-mary', 'purdue-university-main-campus', 'the-new-school', 'texas-a-and-m-university-college-station', 'the-college-of-new-jersey', 'massachusetts-institute-of-technology', 'princeton-university', 'stanford-university', 'harvey-mudd-college', 'california-institute-of-technology', 'dartmouth-college', 'harvard-university', 'williams-college', 'yale-university', 'johns-hopkins-university', 'carnegie-mellon-university', 'university-of-chicago', 'brown-university', 'duke-university', 'colgate-university', 'pomona-college', 'michigan-technological-university', 'pennsylvania-state-university-main-campus', 'suny-at-binghamton', 'miami-university-oxford', 'oregon-state-university', 'st-lawrence-university', 'rose-hulman-institute-of-technology', 'wake-forest-university', 'marquette-university', 'austin-college', 'hobart-william-smith-colleges', 'the-college-of-wooster', 'worcester-polytechnic-institute']
 
     #Loops through all of finalListCollegesOnlyP
     i = 0
@@ -538,7 +550,6 @@ def conversions():
 
 
 
-
 #Flask Section----------------------------------------------------------------------------------------------------------
 app = Flask(__name__)
 
@@ -552,11 +563,13 @@ def home():
 def next():
     # Gets all user inputs from URL and stores them in string
     global inputStr
+    inputStr = ''
 
     inputStr = request.url
     print(inputStr)
 
-    return render_template('in_progress.html', value = inputStr)
+    #11/16 - inputStr is no longer rendered to screen
+    return render_template('in_progress.html')
 
 #Algorithm for rankings------------------------------------------------------------------
 @app.route('/results')
@@ -569,13 +582,48 @@ def results():
     global reportfinalListP
     global finalListCollegesOnlyP
     global finalListCollegesOnlyC
-    global customList
     global inputStr
+    global numPcalls
+    global numCcalls
 
-    #Trims down inputStr
-    endStr = inputStr.split("?")
-    ultiStr = endStr[1]
-    print(ultiStr)
+    #Clears all lists
+    reportfinalListP = []
+    reportfinalListC = []
+    finalList = []
+    numPcalls = 0
+    numCcalls = 0
+    finalListCollegesOnlyP = []
+    finalListCollegesOnlyC = []
+    ultiStr = ''
+    endStr = []
+    first = ''
+    second = ''
+    third = ''
+    fourth = ''
+    fifth = ''
+    sixth = ''
+    seventh = ''
+    eighth = ''
+    ninth = ''
+    tenth = ''
+    eleventh = ''
+    twelfth = ''
+    thirteenth = ''
+    fourteenth = ''
+    fifteenth = ''
+    sixteenth = ''
+    seventeenth = ''
+    eighteenth = ''
+    nineteenth = ''
+    twentieth = ''
+
+    # Trims down inputStr
+    try:
+        endStr = inputStr.split("?", 1)
+        ultiStr = endStr[1]
+        print(ultiStr)
+    except IndexError:
+        ultiStr = inputStr
 
     # Determines which attributes to actually search for----
 
@@ -588,10 +636,14 @@ def results():
 
     i1 = imNameEq + 1
     intendMajorName = ''
-    while ultiStr[i1] != "&":
-        intendMajorName = intendMajorName + ultiStr[i1]
-        i1 += 1
-    print(intendMajorName)
+    try:
+        while ultiStr[i1] != "&":
+            intendMajorName = intendMajorName + ultiStr[i1]
+            i1 += 1
+    except IndexError:
+        intendMajorName = ultiStr
+
+        print(intendMajorName)
 
     intendMajorIM = ultiStr[imNameIeq + 3]
     print(intendMajorIM)
@@ -600,6 +652,8 @@ def results():
         pass
     else:
         called = True
+        numCcalls += 1
+
         collegeFactual(intendMajorName, intendMajorIM)
         listA(1, "C")
 
@@ -629,6 +683,8 @@ def results():
         pass
     else:
         called = True
+        numCcalls += 1
+
         collegeFactual(uSchoolName, uSchoolIM)
         listA(2, "C")
 
@@ -644,8 +700,11 @@ def results():
         pass
     else:
         called = True
+        numCcalls += 1
+
         collegeFactual("Overall Prestige", oPrestigeIeq + 3)
         listA(3, "C")
+        print(finalList)
 
     if called == True:
         nextStr = ultiStr.split("_", 1)
@@ -657,7 +716,7 @@ def results():
 
     print(reportfinalListC)
 
-    # 11 PrincetonReview attributes next---------------
+    # 11 PrincetonReview attributes next--------------------------------------------------------------------------------
     print(ultiStr)
 
     # List of PrincetonReview attributes
@@ -705,44 +764,148 @@ def results():
         if importanceList[i2] == 0:
             pass
         else:
+            numPcalls += 1
+
             princetonReview(attributesList[i2], importanceList[i2])
             listA(i2 + 1, "P")
+            if finalList[1] < 25:
+                del finalList[0]
+                del finalList[1]
 
+            print(finalList)
         i2 += 1
 
-    # converions() and averageA() for P calls
+    #converions() and averageA() for P calls
     conversions()
     averageA("P")
-    print(finalListCollegesOnlyP)
+    print(reportfinalListP)
 
     #Join P and CF list together
     joinA()
     print(reportfinalListC)
 
-    #Gets top 10 schools
-    best10()
-    lastStr = """"""
-    bi = 0
-    ranki = 1
+    #Deletes Southern New Hampshire University Case
+    try:
+        snhuT = 0
+        snhuT = reportfinalListC.count("southern-new-hampshire-university")
+        while snhuT != 0:
+            snhuI = reportfinalListC.index("southern-new-hampshire-university")
 
-    while bi < 20:
-        lastStr = lastStr + str(ranki)
-        lastStr = lastStr + " "
-        lastStr = lastStr + customList[bi]
-        lastStr = lastStr + " "
-        newcl = round(customList[bi + 1], 2)
-        lastStr = lastStr + str(newcl)
-        #TODO Get another way for multilines
-        lastStr = lastStr + ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . "
+            del reportfinalListC[snhuI]
+            del reportfinalListC[snhuI]
+            snhuI = 0
+            snhuT -= 1
 
-        ranki += 1
-        bi += 2
-    print(lastStr)
+    except ValueError:
+        pass
 
-    return render_template('results.html', value = lastStr)
+    print(reportfinalListC)
+    #Gets top 10 schools   ... or top 20 schools
+    bestSort()
+    tenor20 = request.args.get("z", "twenty")
+    print(tenor20)
+    print(customList)
 
+    #Other Way
+    first = customList[0]
+    second = customList[2]
+    third = customList[4]
+    fourth = customList[6]
+    fifth = customList[8]
+    sixth = customList[10]
+    seventh = customList[12]
+    eighth = customList[14]
+    ninth = customList[16]
+    tenth = customList[18]
 
+    if tenor20 == "twenty":
+        eleventh = customList[20]
+        twelfth = customList[22]
+        thirteenth = customList[24]
+        fourteenth = customList[26]
+        fifteenth = customList[28]
+        sixteenth = customList[30]
+        seventeenth = customList[32]
+        eighteenth = customList[34]
+        nineteenth = customList[36]
+        twentieth = customList[38]
 
+    if tenor20 == "twenty":
+        return render_template('results.html', value1 = first, value2 = second, value3 = third, value4 = fourth, value5 = fifth, value6 = sixth, value7 = seventh, value8 = eighth, value9 = ninth, value10 = tenth, value11 =  "11. " + eleventh, value12 = "12. " + twelfth, value13 = "13. " + thirteenth, value14 = "14. " + fourteenth, value15 = "15. " + fifteenth, value16 = "16. " + sixteenth, value17 = "17. " + seventeenth, value18 = "18. " + eighteenth, value19 = "19. " + nineteenth, value20 = "20. " + twentieth)
+    else:
+        return render_template('results.html', value1=first, value2=second, value3=third, value4=fourth, value5=fifth, value6=sixth, value7=seventh, value8=eighth, value9=ninth, value10=tenth)
+
+#Filters rankings based on acceptance rate... and ---------------------------------------
+@app.route('/filter')
+def aRateFilter():
+    global customList
+
+    minimum = int(request.args.get("filterI"))
+    print(minimum)
+
+    filterListCounter = 0
+    i = 0
+    filterList = []
+
+    while filterListCounter < 10:
+        while i < len(customList):
+            if filterListCounter > 10:
+                # Prints final filtered list
+                print(filterList)
+                #Changes List to String
+                filterStr = str(filterList)
+                f1 = filterStr.replace("'", "")
+                f2 = f1.replace(",", "_____")
+                f3 = f2.replace("[", "")
+                f4 = f3.replace("]", "")
+                #print(f4)
+
+                return render_template('filter.html', valuei=f4)
+            else:
+                # Then search google for acceptance rate of each college on customList
+                nowQuery = customList[i]
+
+                # Searches Google to find URL of CF site and gets acceptance rate data
+                query = "CollegeFactual " + nowQuery
+
+                for j in search(query, tld="co.in", num=1, stop=1, pause=2):
+                    goodURL2 = j
+
+                print("Hello: " + goodURL2)
+                # Gets HTML Data from URL
+                r = requests.get(goodURL2)
+                soup = BeautifulSoup(r.text, 'html.parser')
+                f = soup.find('div', class_="grid quick-stats")
+                g = str(f.get_text())
+
+                aRateIndex = g.find("%")
+                ultiRateInt = 0
+
+                finalaRate = []
+                finalaRate.append(g[aRateIndex - 1])
+                if g[aRateIndex - 2] == "y":
+                    ultiaRateInt = int(finalaRate[0])
+                    pass
+                else:
+                    finalaRate.insert(0, (g[aRateIndex - 2]))
+                    tempaRateInt = ''
+                    tempaRateInt = finalaRate[0] + finalaRate[1]
+                    ultiaRateInt = int(tempaRateInt)
+
+                # print(g)
+                # print(aRateIndex)
+                # Returns integer of acceptance rate----------
+                print(ultiaRateInt)
+
+                # Now adds acceptance rates above value to filterList
+                if ultiaRateInt > minimum:
+                    filterList.append(nowQuery)
+                    filterListCounter += 1
+                    print(filterListCounter)
+                else:
+                    pass
+
+                i += 1
 
 
 #Runs Flask------------------------------------------------------------------------------
